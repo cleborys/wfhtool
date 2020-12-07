@@ -4,7 +4,7 @@ const path = require('path');
 
 const socketIO = require('socket.io');
 
-const db = require('./db');
+const { sequelize, User } = require('./db');
 
 app.get('/', (request, response) => {
   response.sendFile(path.join(__dirname, 'index.html'));
@@ -12,14 +12,20 @@ app.get('/', (request, response) => {
 
 app.get('/db', async (request, response) => {
   try {
-    db.query('SELECT * FROM test_table', [], (err, result) => {
-      if (err) {
-        return next(err);
-      }
-      const results = {'results': (result) ? result.rows : null};
-      console.log(results);
-      response.json(results);
-    });
+        try {
+          await sequelize.authenticate();
+          console.log('Successfully connected to database');
+        } catch (error) {
+          console.error('Unable to connect to database:', error);
+        }
+    await sequelize.sync();
+    console.log('Successfully synced');
+    await User.create( { name: 'test user' } );
+    console.log('User created');
+    const users = await User.findAll();
+    console.log('Users found');
+    console.log(users);
+    response.json(users);
   } catch (err) {
     console.log(err);
     response.send('Error ' + err);

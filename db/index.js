@@ -1,17 +1,19 @@
-const {Pool} = require('pg');
+const { Sequelize, DataTypes } = require('Sequelize');
+const sequelize = new Sequelize(process.env.DATABASE_URL);
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
+const User = sequelize.define('MyUser',
+  {
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
   },
-});
+  {
+    // Other model options go here
+  }
+);
 
 module.exports = {
-  query: (text, params, callback) => {
-    pool.query(text, params, (error, result) => {
-      console.log('Executed query', {text, rows: result.rowCount});
-      callback(error, result);
-    });
-  },
-};
+  sequelize: sequelize,
+  User: User,
+}
