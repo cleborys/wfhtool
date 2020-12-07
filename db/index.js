@@ -8,9 +8,7 @@ const User = sequelize.define('MyUser',
       allowNull: false
     },
   },
-  {
-    // Other model options go here
-  }
+  { // Other model options go here }
 );
 
 module.exports = {
