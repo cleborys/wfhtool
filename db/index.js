@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = new Sequelize(process.env.DATABASE_URL);
 
-const User = sequelize.define('MyUser',
+const User = sequelize.define('User',
   {
     name: {
       type: DataTypes.STRING,
