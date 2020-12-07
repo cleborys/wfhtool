@@ -1,6 +1,9 @@
 # TODO README
 TODO some general readme
 
+# Code Style
+You can run `eslint` using `npx eslint .`
+
 # Local database setup
 The deployment database is managed by Heroku along with its connection credentials, which will be provided in the environment variable `DATABASE_URL`.
 For local development, the following is recommended:

@@ -1,4 +1,4 @@
-const { Pool } = require('pg');
+const {Pool} = require('pg');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -10,8 +10,8 @@ const pool = new Pool({
 module.exports = {
   query: (text, params, callback) => {
     pool.query(text, params, (error, result) => {
-      console.log('Executed query', { text, rows: result.rowCount });
+      console.log('Executed query', {text, rows: result.rowCount});
       callback(error, result);
     });
   },
-}
+};

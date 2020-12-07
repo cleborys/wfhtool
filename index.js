@@ -14,9 +14,9 @@ app.get('/db', async (request, response) => {
   try {
     db.query('SELECT * FROM test_table', [], (err, result) => {
       if (err) {
-        return next(err)
+        return next(err);
       }
-      const results = { 'results': (result) ? result.rows : null };
+      const results = {'results': (result) ? result.rows : null};
       console.log(results);
       response.json(results);
     });
