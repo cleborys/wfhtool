@@ -4,16 +4,7 @@ const path = require('path');
 
 const socketIO = require('socket.io');
 
-const { Pool } = require('pg'); // postgres database
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    sslmode: 'disable',
-    rejectUnauthorized: false,
-  },
-});
-console.log(`Database connection: ${process.env.DATABASE_URL}`);
-
+const db = require('./db');
 
 app.get('/', (request, response) => {
   response.sendFile(path.join(__dirname, 'index.html'));
@@ -21,12 +12,14 @@ app.get('/', (request, response) => {
 
 app.get('/db', async (request, response) => {
   try {
-    const client = await pool.connect(); 
-    const result = await client.query('SELECT * from test_table');
-    const results = { 'results': (result) ? result.rows : null };
-    console.log(results);
-    response.json(results);
-    client.release();
+    db.query('SELECT * FROM test_table', [], (err, result) => {
+      if (err) {
+        return next(err)
+      }
+      const results = { 'results': (result) ? result.rows : null };
+      console.log(results);
+      response.json(results);
+    });
   } catch (err) {
     console.log(err);
     response.send('Error ' + err);
