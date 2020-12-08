@@ -2,9 +2,11 @@ const express = require('express');
 const app = express();
 const path = require('path');
 
-const socketIO = require('socket.io');
+const socketio = require('socket.io');
 
-const { sequelize, User } = require('./db');
+const {sequelize, User} = require('./db');
+const {loginSocket} = require('./server/auth.js');
+const {setStatus} = require('./server/status.js');
 
 app.get('/', (request, response) => {
   response.sendFile(path.join(__dirname, 'index.html'));
@@ -12,15 +14,15 @@ app.get('/', (request, response) => {
 
 app.get('/db', async (request, response) => {
   try {
-        try {
-          await sequelize.authenticate();
-          console.log('Successfully connected to database');
-        } catch (error) {
-          console.error('Unable to connect to database:', error);
-        }
+    try {
+      await sequelize.authenticate();
+      console.log('Successfully connected to database');
+    } catch (error) {
+      console.error('Unable to connect to database:', error);
+    }
     await sequelize.sync();
     console.log('Successfully synced');
-    await User.create( { name: 'test user' } );
+    await User.create( {name: 'Alice'} );
     console.log('User created');
     const users = await User.findAll();
     console.log('Users found');
@@ -39,14 +41,19 @@ const server = app.listen(port, () => {
 });
 
 
-const io = socketIO(server);
+const io = socketio(server);
+io.on('connection', (socket) => {
+  console.log('A socket connected');
 
-io.on( 'connection', (socket) => {
-  console.log('Client connected');
-  socket.on('disconnect', () => console.log('Client disconnected'));
+  socket.on('login', async (data) => {
+    const response = await loginSocket(data);
+    console.log('Login request response is ', response);
+    socket.emit('login_result', response);
+  });
+
+  socket.on('set_status', (data) => {
+    setStatus(data);
+  });
+
+  socket.on('disconnect', () => console.log('A socket disconnected'));
 });
-
-setInterval(
-    () => io.emit('time', new Date().toTimeString()),
-    1000,
-);

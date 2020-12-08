@@ -6,8 +6,31 @@
         <script src="/socket.io/socket.io.js"></script>
         <script>
             var socket = io();
-            socket.on("time", (timeString) => {
-                console.log(timeString);
+            let token = '';
+
+            function loginAlice() {
+              socket.emit("login", { name: 'Alice', });
+            }
+            
+            function loginBob() {
+              socket.emit("login", { name: 'Bob', });
+            }
+
+            function setWorking() {
+              socket.emit('set_status', { new_status: 'working', token: token });
+            }
+
+            function setSleeping() {
+              socket.emit('set_status', { new_status: 'sleeping', token: token });
+            }
+
+            socket.on('state', (data) => {
+              console.log(data);
+            });
+
+            socket.on('login_result', (data) => {
+              console.log('login result: ', data);
+              token = data.token;
             });
         </script>
     </head>
@@ -15,6 +38,10 @@
     <body>
         <h1>Hello, world!</h1
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        <button onclick='loginAlice()'> Login Alice </button>
+        <button onclick='loginBob()'> Login Bob </button>
+        <button onclick='setWorking()'> I am working </button>
+        <button onclick='setSleeping()'> I am sleeping </button>
     </body>
 
 </html>
