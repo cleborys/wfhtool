@@ -196,7 +196,7 @@ class LoginForm extends React.Component {
               <div className="form-horizontal">
                 <input type="text" className="form-control" id="inputUserName"
                   placeholder="username" onChange={this.changeName}/>
-                <input type="text" className="form-control" id="inputPassword"
+                <input type="password" className="form-control" id="inputPassword"
                   placeholder="password" onChange={this.changePassword}/>
               </div>
             </form>
