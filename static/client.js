@@ -69,6 +69,9 @@ function update() {
   };
 	r.style.fontSize = "200%"
 	statuses.forEach((status, username) => {
+    if (username === myName){
+      return;
+    }
 		var row = t.insertRow();
 		var c0 = row.insertCell();
 		var c1 = row.insertCell();
