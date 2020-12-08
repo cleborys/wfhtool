@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <title>Awesome work from home status tool</title>
         <script src="/socket.io/socket.io.js"></script>
+        <script src="./client.js"></script>
     </head>
 
     <body>
@@ -12,7 +13,13 @@
 			<table>
 				<tr><td>Username</td><td><input id="in1" type="text" autofocus spellcheck="false"></td></tr>
 				<tr><td>Password</td><td><input id="in2" type="password"></td></tr>
-				<tr><td></td><td><input id="button" type="button" onclick="login()"></td></tr>
+				<tr>
+          <td></td>
+          <td>
+            <button onclick='create()'>Sign Up</button>
+            <button onclick='login()'>Sign In</button>
+          </td>
+        </tr>
 			</table>
 		</div>
 		<br/>
@@ -21,179 +28,6 @@
 		<div id="time"></div>
     </body>
 
-	<script>
-
-//******************************************************************************
-//Load.
-//******************************************************************************
-
-const status_ = [
-	"Sleeping",
-	"Working",
-	"Breakfast",
-	"Lunch",
-	"Sick",
-	"Holiday",
-	"Feeling lazy"
-];
-
-const color_ = [
-	"Grey",
-	"LightGreen",
-	"LightCyan",
-	"Tan",
-	"Tomato",
-	"LightBlue",
-	"Pink"
-];
-
-var me = {id: 123, name: "USER", status: 0};
-var token = "";
-var users = new Map();
-var socket = io();
-
-socket.on("all_states", (arr) => {
-	users = new Map();
-	console.log("all_states:");
-	for(let user of arr) {
-		console.log(user);
-		users.set(user.id, user);
-	}
-	update();
-});
-
-socket.on("state", (user) => {
-	console.log("state", user);
-	users.set(user.id, user);
-	update();
-});
-
-socket.on('login_result', (data) => {
-	console.log('login result: ', data);
-    token = data.token;
-	update();
-	updateTime();
-	socket.emit("set_status", me, token);
-});
-
-function update() {
-	if(!token) return;
-	var t  = document.createElement('table');
-	var r = t.insertRow();
-	var c0 = r.insertCell();
-	var c1 = r.insertCell();
-	r.style.fontSize = "200%"
-	c0.innerHTML = me.name;
-	c1.innerHTML = status_[me.status];
-	c1.style.backgroundColor = color_[me.status];
-	c1.onclick = function () {
-			me.status = (me.status + 1) % status_.length;
-            c1.innerHTML = status_[me.status];
-			c1.style.backgroundColor = color_[me.status];
-			socket.emit("set_status", me);
-        };
-	users.forEach((user, id) => {
-		var row = t.insertRow();
-		var c0 = row.insertCell();
-		var c1 = row.insertCell();
-		c0.innerHTML = user.name + " (" + user.id + ")";
-		c1.innerHTML = status_[user.status];
-		c1.style.backgroundColor = color_[user.status];
-	});
-	get("t").innerHTML = "";
-	get("t").appendChild(t);
-}
-
-function run() {
-	//update();
-}
-
-function login() {
-	//Get message.
-	var name = get("in1").value
-	var psw  = get("in2").value
-	me.id = Math.random();
-	me.name = name;
-	me.status = 0;
-	get("login").innerHTML = "";
-	started = true;
-	update();
-	updateTime();
-	console.log("login", me);
-	socket.emit("login", me);
-}
-
-function updateTime() {
-	if(!token) return;
-	var t  = document.createElement('table');
-
-	var r = t.insertRow();
-	var c0 = r.insertCell();
-	var c1 = r.insertCell();
-	c0.innerHTML = "Work today"
-	c1.innerHTML = today();
-
-	r = t.insertRow();
-	c0 = r.insertCell();
-	c1 = r.insertCell();
-	c0.innerHTML = "Work this week"
-	c1.innerHTML = week();
-
-	get("time").innerHTML = "";
-	get("time").appendChild(t);
-}
-
-var seconds_today = 0;
-var seconds_week = 0;
-
-function today() {
-	return timestr(seconds_today);
-}
-
-function week() {
-	return timestr(seconds_week);
-}
-
-function timestr(s) {
-	var h = Math.floor(s / 3600);
-	s -= 3600*h;
-	var m = Math.floor(s / 60);
-	s -= 60*m;
-	var str = "" + s;
-	while(str.length < 2) {
-		str = "0" + str;
-	}
-	str = m + ":" + str;
-	while(str.length < 5) {
-		str = "0" + str;
-	}
-	str = h + ":" + str;
-	while(str.length < 8) {
-		str = "0" + str;
-	}
-	return str;
-}
-
-setInterval(function() {
-	if(me.status != 1) return;
-	seconds_today++;
-	seconds_week++;
-	updateTime();
-}, 1000);
-
-
-
-//******************************************************************************
-//HTML
-//******************************************************************************
-
-function get(id) {
-	return document.getElementById(id)
-}
-
-//******************************************************************************
-
-	</script>
 	<style>
 
 	body {

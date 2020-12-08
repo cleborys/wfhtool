@@ -10,7 +10,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "eslint": "^7.15.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-react": "^7.21.5",
     "express": "^4.17.1",
-    "socket.io": "^3.0.3"
-  }
+    "jsonwebtoken": "^8.5.1",
+    "mysql": "^2.18.1",
+    "pg": "^8.5.1",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^6.3.5",
+    "socket.io": "^3.0.3",
+    "socketio-jwt": "^4.6.2"
+  },
+  "devDependencies": {}
 }
