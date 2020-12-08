@@ -21,7 +21,7 @@ color_.set('Sick', 'Tomato');
 color_.set('Holiday', 'LightBlue');
 color_.set('Feeling lazy', 'Pink');
 
-let myStatusIndex = 0;
+let myStatusIndex = 1;
 let myName = '';
 let token = '';
 const socket = io();
@@ -88,6 +88,7 @@ class App extends React.Component {
             <div className="row">
               <div className="col-lg"></div>
               <div className="col-lg">
+                <h1> WFH Status Tool </h1>
                 <LoginForm />
               </div>
               <div className="col-lg"></div>
@@ -100,7 +101,8 @@ class App extends React.Component {
     return (
       <div id="react-rendered">
 
-        <div className="container" style={{padding: '60px 30px'}}>
+        <div className="container" style={{padding: '30px 30px'}}>
+        <h1> WFH Status Tool </h1>
           <div className="row">
             <div className="col-lg">
               <div className="row">
