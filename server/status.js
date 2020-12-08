@@ -36,7 +36,7 @@ async function getLastStatus(userId) {
 async function getAllStatuses() {
   // TODO: do this in a single query
   const allUsers = await User.findAll();
-  let result = [];
+  const result = [];
   for (const user of allUsers) {
     result.push(await getLastStatus(user.id));
   }

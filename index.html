@@ -4,28 +4,22 @@
         <meta charset="utf-8">
         <title>Awesome work from home status tool</title>
         <script src="/socket.io/socket.io.js"></script>
-        <script src="./client.js"></script>
+        <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+        <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+        <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+        <link rel="stylesheet" href="https://bootswatch.com/3/paper/bootstrap.min.css">
     </head>
 
     <body>
-		<div id="login">
-			<h2>Login</h2>
-			<table>
-				<tr><td>Username</td><td><input id="in1" type="text" autofocus spellcheck="false"></td></tr>
-				<tr><td>Password</td><td><input id="in2" type="password"></td></tr>
-				<tr>
-          <td></td>
-          <td>
-            <button onclick='create()'>Sign Up</button>
-            <button onclick='login()'>Sign In</button>
-          </td>
-        </tr>
-			</table>
-		</div>
+
+    <div id="reactDOM"></div>
+
 		<br/>
 		<div id="t"></div>
 		<br/>
 		<div id="time"></div>
+
+    <script src="./client.js" type="text/babel"></script>
     </body>
 
 	<style>
@@ -44,6 +38,13 @@
 		table-layout: fixed;
 		width: 30em;
 	}
+  
+  #loginPanel {
+    margin-top: 60px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 40em;
+  }
 
 	#h {
 		font-size: 2em;
