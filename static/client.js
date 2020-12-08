@@ -43,11 +43,14 @@ socket.on("state", (statusData) => {
 
 socket.on('login_result', (data) => {
 	console.log('login result: ', data);
+  if (data.success) {
     token = data.token;
     myName = data.username;
-	update();
-	updateTime();
-	socket.emit("set_status", { new_status: status_[myStatusIndex], token: token });
+	  get("login").innerHTML = "";
+	  update();
+	  updateTime();
+	  socket.emit("set_status", { new_status: status_[myStatusIndex], token: token });
+  }
 });
 
 function update() {
@@ -79,7 +82,6 @@ function update() {
 
 function login() {
 	var name = get("in1").value
-	get("login").innerHTML = "";
 	socket.emit("login", { name: name });
 	update();
 	updateTime();
