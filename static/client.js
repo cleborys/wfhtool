@@ -1,5 +1,5 @@
 //* *****************************************************************************
-// Load.
+// Globals
 //* *****************************************************************************
 
 const status_ = [
@@ -24,111 +24,21 @@ color_.set('Feeling lazy', 'Pink');
 let myStatusIndex = 0;
 let myName = '';
 let token = '';
-const statuses = new Map();
 const socket = io();
-
-socket.on('all_states', (arr) => {
-  console.log('all_states:');
-  for (const statusData of arr) {
-    statuses.set(statusData.username, statusData.status);
-  }
-  update();
-});
-
-socket.on('state', (statusData) => {
-  console.log('Received status update', statusData);
-  statuses.set(statusData.username, statusData.status);
-  update();
-});
 
 socket.on('login_result', (data) => {
   console.log('login result: ', data);
   if (data.success) {
     token = data.token;
     myName = data.username;
-    update();
-    updateTime();
     socket.emit('set_status', {new_status: status_[myStatusIndex], token: token});
   }
 });
 
-function update() {
-  if (!token) return;
-  const t = document.createElement('table');
-  const r = t.insertRow();
-  const c0 = r.insertCell();
-  const c1 = r.insertCell();
-  c0.innerHTML = myName;
-  const myStatus = statuses.get(myName);
-  c1.innerHTML = myStatus;
-  c1.style.backgroundColor = color_.get(myStatus) || 'LightBlue';
-  c1.onclick = function() {
-    myStatusIndex = (myStatusIndex + 1) % status_.length;
-    socket.emit('set_status', {new_status: status_[myStatusIndex], token: token});
-  };
-  r.style.fontSize = '200%';
-  statuses.forEach((status, username) => {
-    if (username === myName) {
-      return;
-    }
-    const row = t.insertRow();
-    const c0 = row.insertCell();
-    const c1 = row.insertCell();
-    c0.innerHTML = username;
-    c1.innerHTML = status;
-    c1.style.backgroundColor = color_.get(status) || 'LightBlue';
-  });
-  get('t').innerHTML = '';
-  get('t').appendChild(t);
-}
-
-function login() {
-  const name = get('in1').value;
-  socket.emit('login', {name: name});
-  update();
-  updateTime();
-}
-
-function create() {
-  const name = get('in1').value;
-  console.log('Trying to create user with name', name);
-  socket.emit('create_user', {name: name});
-}
 
 //* *****************************************************************************
 // Time keeping
 //* *****************************************************************************
-
-function updateTime() {
-  if (!token) return;
-  const t = document.createElement('table');
-
-  let r = t.insertRow();
-  let c0 = r.insertCell();
-  let c1 = r.insertCell();
-  c0.innerHTML = 'Work today';
-  c1.innerHTML = today();
-
-  r = t.insertRow();
-  c0 = r.insertCell();
-  c1 = r.insertCell();
-  c0.innerHTML = 'Work this week';
-  c1.innerHTML = week();
-
-  get('time').innerHTML = '';
-  get('time').appendChild(t);
-}
-
-let seconds_today = 0;
-let seconds_week = 0;
-
-function today() {
-  return timestr(seconds_today);
-}
-
-function week() {
-  return timestr(seconds_week);
-}
 
 function timestr(s) {
   const h = Math.floor(s / 3600);
@@ -150,33 +60,85 @@ function timestr(s) {
   return str;
 }
 
-setInterval(function() {
-  if (myStatusIndex != 1) return;
-  seconds_today++;
-  seconds_week++;
-  updateTime();
-}, 1000);
-
-
 //* *****************************************************************************
-// HTML
-//* *****************************************************************************
-
-function get(id) {
-  return document.getElementById(id);
-}
-
+// React
 //* *****************************************************************************
 
 class App extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {loggedIn: false};
+
+    socket.on('login_result', (data) => {
+      if (data.success) {
+        this.setState({loggedIn: true});
+      }
+      console.log(this.state);
+    });
+    console.log(this.state);
   }
 
   render() {
+    if (!this.state.loggedIn) {
+      return (
+        <div id="react-rendered">
+
+          <div className="container" style={{padding: '60px 30px'}}>
+            <div className="row">
+              <div className="col-lg"></div>
+              <div className="col-lg">
+                <LoginForm />
+              </div>
+              <div className="col-lg"></div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div id="react-rendered">
-        <LoginForm />
+
+        <div className="container" style={{padding: '60px 30px'}}>
+          <div className="row">
+            <div className="col-lg">
+              <div className="row">
+                <div className="col-sm">
+
+                  <div className="card border-primary mb-3">
+                    <div className="card-header">My Status</div>
+                    <div className="card-body">
+                      <StatusControl />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-sm">
+
+                  <div className="card border-primary mb-3">
+                    <div className="card-header">Timers</div>
+                    <div className="card-body">
+                      <Timers />
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+            <div className="col-lg">
+
+              <div className="card border-primary mb-3">
+                <div className="card-header">Status list</div>
+                <div className="card-body">
+                  <StatusTable />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     );
   }
@@ -247,6 +209,168 @@ class LoginForm extends React.Component {
     );
   }
 };
+
+class StatusTable extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {statusMap: new Map()};
+  }
+
+  componentDidMount() {
+    socket.on('all_states', (arr) => {
+      this.setState((previousState) => {
+        const newMap = new Map();
+        for (const statusData of arr) {
+          newMap.set(statusData.username, statusData.status);
+        }
+        return {statusMap: newMap};
+      });
+      console.log('New states:', this.state);
+    },
+    );
+
+    socket.on('state', (statusData) => {
+      this.setState((previousState) => {
+        const newMap = previousState.statusMap;
+        newMap.set(statusData.username, statusData.status);
+        return {statusMap: newMap};
+      });
+      console.log('New states:', this.state);
+    },
+    );
+  }
+
+  render() {
+    const rowArray = [];
+    this.state.statusMap.forEach( (status, username) => {
+      if (username === myName) {
+        return;
+      }
+      rowArray.push({status: status, username: username});
+    });
+
+    if (rowArray.length === 0) {
+      return (
+        <div>
+            Waiting for data
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <table className="table table-hover table-sm">
+            <thead><tr>
+              <th className="w-50">Name</th>
+              <th className="w-50">Status</th>
+            </tr></thead>
+            <tbody>
+              {
+                rowArray.map((statusData) =>
+                  <StatusTableRow key={statusData.username} statusData={statusData} />,
+                )
+              }
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+  }
+};
+
+class StatusTableRow extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    const color = color_.get(this.props.statusData.status) || 'LightBlue';
+    return (
+      <tr>
+        <td> {this.props.statusData.username} </td>
+        <td style={{backgroundColor: color}}>
+          {this.props.statusData.status}
+        </td>
+      </tr>
+    );
+  }
+}
+
+class StatusControl extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {myStatus: 'unknown'};
+
+    this.handleChange = this.handleChange.bind(this);
+
+    socket.on('state', (statusData) => {
+      if (statusData.username === myName) {
+        this.setState({myStatus: statusData.status});
+      }
+    });
+  }
+
+  handleChange(event) {
+    myStatusIndex = (myStatusIndex + 1) % status_.length;
+    socket.emit('set_status', {new_status: status_[myStatusIndex], token: token});
+  }
+
+  render() {
+    return (<div>
+      <table className="table table-hover table-sm">
+        <thead><tr>
+          <th className="w-50">Name</th>
+          <th className="w-50">Status</th>
+        </tr></thead>
+        <tbody>
+          <StatusTableRow statusData={{username: myName, status: this.state.myStatus}} />
+        </tbody>
+      </table>
+      <button className="btn btn-primary" onClick={this.handleChange}>
+          Change status
+      </button>
+    </div>);
+  }
+}
+
+class Timers extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {secondsToday: 0, secondsWeek: 0};
+  }
+
+  componentDidMount() {
+    this.interval = setInterval( () => {
+      if (myStatusIndex != 1) return;
+      this.setState((previousState) => {
+        return {
+          secondsToday: previousState.secondsToday + 1,
+          secondsWeek: previousState.secondsWeek + 1,
+        };
+      });
+    }, 1000);
+  }
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
+
+  render() {
+    return (<div>
+      <table className="table table-hover table-sm">
+        <tbody>
+          <tr>
+            <td className="w-50">Work today</td>
+            <td>{timestr(this.state.secondsToday)}</td>
+          </tr>
+          <tr>
+            <td className="w-50">Work this week</td>
+            <td>{timestr(this.state.secondsWeek)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>);
+  }
+}
 
 ReactDOM.render(
     <App />,
