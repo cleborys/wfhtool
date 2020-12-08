@@ -5,7 +5,7 @@ const secret = process.env.SECRET || 'please provide a secret';
 function encodeUser(user) {
   return new Promise( (resolve, reject) => {
     jwt.sign(
-        {'UserId': user.id},
+        {'userId': user.id},
         secret,
         {'expiresIn': '2d'},
         (error, token) => {
@@ -25,7 +25,7 @@ function decodeUser(token) {
       if (error) {
         reject(error);
       } else {
-        resolve(decoded.UserId);
+        resolve(decoded.userId);
       }
     });
   });
@@ -37,12 +37,14 @@ function authorizedDecorator(wrapped) {
       console.log('Unauthorized request data: ', data);
       return;
     }
+    let userId;
     try {
-      const UserId = await decodeUser(data.token);
-      return await wrapped(UserId, data);
+      userId = await decodeUser(data.token);
     } catch (error) {
       console.log('Invalid token in data: ', data);
+      return;
     }
+    return await wrapped(userId, data);
   };
 }
 

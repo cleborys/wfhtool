@@ -18,7 +18,20 @@ const User = sequelize.define('User',
     },
 );
 
+const UserStatus = sequelize.define('UserStatus',
+    {
+      status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+    },
+);
+
+User.hasMany(UserStatus);
+UserStatus.belongsTo(User);
+
 module.exports = {
   sequelize: sequelize,
   User: User,
+  UserStatus: UserStatus,
 };

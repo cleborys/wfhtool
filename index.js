@@ -62,8 +62,10 @@ io.on('connection', (socket) => {
     socket.emit('create_result', response);
   });
 
-  socket.on('set_status', (data) => {
-    setStatus(data);
+  socket.on('set_status', async (data) => {
+    const update = await setStatus(data);
+    console.log('broadcasting', update);
+    io.emit('state', update);
   });
 
   socket.on('disconnect', () => console.log('A socket disconnected'));
