@@ -17,12 +17,23 @@ const server = app.listen(port , () => {
 
 const io = socketIO(server);
 
-io.on( "connection", (socket) => {
+var users = new Map();
+
+io.on("connection", (socket) => {
     console.log("Client connected");
     socket.on("disconnect", () => console.log("Client disconnected"));
+	socket.on("set_status", (user, token) => {
+		// check token...
+		users.set(user.id, user);
+		socket.broadcast.emit("state", user);
+	});
+	socket.on("login", (user) => {
+		users.set(user.id, user);
+		socket.emit("login_result", {token: "123"});
+		var all = [];
+		users.forEach((user, id) => {
+			all.push(user);
+		});
+		socket.emit("all_states", all);
+	});
 });
-
-setInterval(
-    () => io.emit("time", new Date().toTimeString()),
-    1000
-);
