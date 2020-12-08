@@ -9,11 +9,17 @@
             let token = '';
 
             function loginAlice() {
-              socket.emit("login", { name: 'Alice', });
+              socket.emit('login', { name: 'Alice' });
             }
             
             function loginBob() {
-              socket.emit("login", { name: 'Bob', });
+              socket.emit('login', { name: 'Bob' });
+            }
+
+            function createUser() {
+              const userName = Math.random().toString(36);
+              socket.emit('create_user', { name: userName });
+              console.log('Trying to create user with name', userName);
             }
 
             function setWorking() {
@@ -32,6 +38,10 @@
               console.log('login result: ', data);
               token = data.token;
             });
+            
+            socket.on('create_result', (data) => {
+              console.log('user creation result: ', data);
+            });
         </script>
     </head>
 
@@ -42,6 +52,7 @@
         <button onclick='loginBob()'> Login Bob </button>
         <button onclick='setWorking()'> I am working </button>
         <button onclick='setSleeping()'> I am sleeping </button>
+        <button onclick='createUser()'> Create random user </button>
     </body>
 
 </html>

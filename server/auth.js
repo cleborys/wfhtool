@@ -59,7 +59,20 @@ async function loginSocket(data) {
   return {success: true, token: token};
 }
 
+async function createUser(data) {
+  if (data.name === undefined) {
+    return {success: false, msg: 'No username provided'};
+  }
+  try {
+    await User.create( {name: data.name} );
+  } catch (error) {
+    return {success: false, msg: error.toString()};
+  }
+  return {success: true, msg: 'Successfully created  a user'};
+}
+
 module.exports = {
   loginSocket: loginSocket,
   authorized: authorizedDecorator,
+  createUser: createUser,
 };
